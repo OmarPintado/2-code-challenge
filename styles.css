@@ -89,18 +89,37 @@ li:last-child {
 
 /* Botones */
 .edit-btn {
-	background-color: goldenrod;
-	color: black;
-	}
-.edit-btn:hover{
 	background-color: gold;
-	}
-
-.delete-btn{
-	background-color: firebrick;
 	color: black;
+	border: none;
+	border-radius: 4px;
+	padding: 5px 10px;
+	width: fit-content;
 	}
 
-.delete-btn:hover{
-	background-color: red;
+.edit-btn:hover {
+	background-color: goldenrod;
+	}
+
+.delete-btn {
+	background-color: #dc3545;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	padding: 5px 10px;
+	width: fit-content;
+	}
+
+.delete-btn:hover {
+	background-color: #c82333;
+	}
+
+#create-category__form button {
+	width: auto;
+	background-color: #007bff;
+	color: #fff;
+	}
+
+#create-category__form button:hover {
+	background-color: #0056b3;
 	}

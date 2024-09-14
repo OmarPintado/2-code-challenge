@@ -1,7 +1,7 @@
 import { Category } from "./category-class.js";
 import { Expense } from "./expense-class.js";
 import { validateNumber, validateString } from "../validation.js";
-import { displayExpenses, displayExpensesByCategory } from "../domRedering.js";
+import { displayExpenses, displayExpensesByCategory, populateCategoryOptions} from "../domRedering.js";
 import { addSubmitClick, editSubmitClick } from "../eventsForm.js";
 import { getDateFormat } from "../utils.js";
 
@@ -18,8 +18,22 @@ export class Tracker {
     this.expenses = this.loadExpenses();
   }
 
-  addCategory(name) {
-    this.categories.push(new Category(name));
+  addCategory(e) {
+    e.preventDefault();
+
+    const newCategory = document.getElementById('new-category').value.trim();
+
+    if (!validateString(newCategory)) {
+      alert("La categoría no puede estar vacía ni contener caracteres especiales");
+      return;
+    }
+
+    this.categories.push(new Category(newCategory));
+
+    populateCategoryOptions(this.categories);
+
+    document.getElementById('create-category__form').reset();
+    alert(`Se agregó la categoría ${this.categories[this.categories.length - 1].name}`)
   }
 
   addExpense(e) {
@@ -30,11 +44,13 @@ export class Tracker {
     const category = document.getElementById("category").value;
 
     if (!validateString(description)) {
-      console.log("Hay error");
+      alert("La descripción no puede contener caracteres especiales.")
+      return;
     }
 
     if (!validateNumber(amount)) {
-      console.log("Hay error");
+      alert("Solo deben usarse números enteros.")
+      return;
     }
 
     const expense = new Expense(
@@ -97,7 +113,7 @@ export class Tracker {
       (expense) => Number(expense.idExpense) === Number(idExpense)
     );
 
-    if (expense == undefined) return;
+    if (expense === undefined) return;
 
     document.getElementById("amount").value = expense.amount;
     document.getElementById("description").value = expense.description;

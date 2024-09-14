@@ -5,7 +5,7 @@
  * @returns {boolean} True if the name is valid, false otherwise.
  */
 export function validateString(text) {
-    const textRegex = /^[A-Za-z\s]+$/;
+    const textRegex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
     return textRegex.test(text);
 }
 

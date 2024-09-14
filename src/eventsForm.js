@@ -3,8 +3,6 @@ import { Category } from "./classes/category-class.js";
 import { displayExpenses, displayExpensesByCategory } from "./domRedering.js";
 
 export const addSubmitClick = (e) => {
-  e.preventDefault();
-
   tracker.addExpense(e);
 };
 
@@ -12,10 +10,10 @@ export const editSubmitClick = (e) => {
   e.preventDefault();
 
   const form = document.getElementById("expense-form");
-  handleeditSubmitClick(form.dataset.id);
+  handleEditSubmitClick(form.dataset.id);
 };
 
-const handleeditSubmitClick = (idExpense) => {
+const handleEditSubmitClick = (idExpense) => {
   const ind = tracker.expenses.findIndex(
     (expense) => Number(expense.idExpense) === Number(idExpense)
   );
