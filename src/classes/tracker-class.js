@@ -1,79 +1,119 @@
-import {Category} from "./category-class.js";
-import {Expense} from "./expense-class.js";
-import {validateNumber, validateString} from "../validation.js";
-import {displayExpenses, displayExpensesByCategory} from "../domRedering.js"
+import { Category } from "./category-class.js";
+import { Expense } from "./expense-class.js";
+import { validateNumber, validateString } from "../validation.js";
+import { displayExpenses, displayExpensesByCategory } from "../domRedering.js";
+import { addSubmitClick, editSubmitClick } from "../eventsForm.js";
+import { getDateFormat } from "../utils.js";
 
 export class Tracker {
-    constructor() {
-        this.categories = [
-            new Category('Food'),
-            new Category('Transport'),
-            new Category('Utilities'),
-            new Category('Entertainment'),
-            new Category('Others')
-        ]
+  constructor() {
+    this.categories = [
+      new Category("Food"),
+      new Category("Transport"),
+      new Category("Utilities"),
+      new Category("Entertainment"),
+      new Category("Others"),
+    ];
 
-        this.expenses = this.loadExpenses();
+    this.expenses = this.loadExpenses();
+  }
+
+  addCategory(name) {
+    this.categories.push(new Category(name));
+  }
+
+  addExpense(e) {
+    e.preventDefault();
+    const amount = document.getElementById("amount").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const date = document.getElementById("date").value;
+    const category = document.getElementById("category").value;
+
+    if (!validateString(description)) {
+      console.log("Hay error");
     }
 
-    addCategory(name) {
-        this.categories.push(new Category(name));
+    if (!validateNumber(amount)) {
+      console.log("Hay error");
     }
 
-    addExpense(e) {
-        e.preventDefault();
-        const amount = document.getElementById('amount').value.trim();
-        const description = document.getElementById('description').value.trim();
-        const date = document.getElementById('date').value;
-        const category = document.getElementById('category').value;
+    const expense = new Expense(
+      amount,
+      description,
+      date,
+      new Category(category)
+    );
+    this.expenses.push(expense);
+    this.saveExpenses();
+    displayExpenses(this.expenses);
+    displayExpensesByCategory(this.getExpensesByCategory());
 
-        console.log(amount, description, date, category);
+    document.getElementById("expense-form").reset();
+  }
 
-        if (!validateString(description)) {
-            console.log('Hay error');
-        }
+  loadExpenses() {
+    const data = localStorage.getItem("expenses");
+    return data
+      ? JSON.parse(data).map(
+          (exp) =>
+            new Expense(
+              exp.amount,
+              exp.description,
+              new Date(exp.date),
+              new Category(exp.category.name)
+            )
+        )
+      : [];
+  }
 
-        if (!validateNumber(amount)) {
-            console.log('Hay error');
-        }
+  saveExpenses() {
+    localStorage.setItem("expenses", JSON.stringify(this.expenses));
+  }
 
-        const expense = new Expense(amount, description, date, new Category(category));
-        this.expenses.push(expense);
-        this.saveExpenses();
-        displayExpenses(this.expenses)
-        displayExpensesByCategory(this.getExpensesByCategory())
+  getExpensesByCategory() {
+    return this.expenses.reduce((acc, expense) => {
+      const categoryName = expense.category.name;
+      if (!acc[categoryName]) {
+        acc[categoryName] = 0;
+      }
+      acc[categoryName] += Number(expense.amount);
+      return acc;
+    }, {});
+  }
 
-        document.getElementById('expense-form').reset();
-    }
+  deleteExpense(e) {
+    const idExpense = e.target.parentElement.getAttribute("idExpense");
+    this.expenses = this.expenses.filter(
+      (expense) => Number(expense.idExpense) !== Number(idExpense)
+    );
+    this.saveExpenses();
+    displayExpenses(this.expenses);
+    displayExpensesByCategory(this.getExpensesByCategory());
+  }
 
-    loadExpenses() {
-        const data = localStorage.getItem('expenses');
-        return data ? JSON.parse(data).map(exp => new Expense(exp.amount, exp.description, new Date(exp.date), new Category(exp.category.name))) : [];
-    }
+  editExpense(e) {
+    const idExpense = e.target.parentElement.getAttribute("idExpense");
+    const expense = this.expenses.find(
+      (expense) => Number(expense.idExpense) === Number(idExpense)
+    );
 
-    saveExpenses() {
-        localStorage.setItem('expenses', JSON.stringify(this.expenses));
-    }
+    if (expense == undefined) return;
 
+    document.getElementById("amount").value = expense.amount;
+    document.getElementById("description").value = expense.description;
+    document.getElementById("date").value = getDateFormat(expense.date);
+    document.getElementById("category").value = expense.category.name;
 
-    getExpensesByCategory() {
-        return this.expenses.reduce((acc, expense) => {
-            const categoryName = expense.category.name;
-            if (!acc[categoryName]) {
-                acc[categoryName] = 0;
-            }
-            acc[categoryName] += Number(expense.amount);
-            return acc;
-        }, {});
-    }
+    const form = document.getElementById("expense-form");
+    document.getElementById("expense-form__submit").textContent =
+      "Edit Expense";
 
-    deleteExpense(e){
-        const idExpense = e.target.parentElement.getAttribute('idExpense');
-        if(e.target.classList.contains('delete-btn')){
-            this.expenses = this.expenses.filter((expense) => Number(expense.idExpense) !== Number(idExpense));
-            this.saveExpenses();
-            displayExpenses(this.expenses);
-            displayExpensesByCategory(this.getExpensesByCategory())
-        }
-    }
+    form.dataset.id = idExpense;
+
+    // Remove last function event
+    form.removeEventListener("submit", addSubmitClick);
+
+    // Add edit function event
+    form.addEventListener("submit", editSubmitClick);
+  }
 }
